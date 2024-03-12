@@ -1,9 +1,9 @@
 
+import sys 
 import pyzed.sl as sl
 import os
 import shutil
 import json
-import sys
 
 def parse_camera_parameters(zed):
     calibration_params = zed.get_camera_information().calibration_parameters
@@ -78,7 +78,7 @@ def main(filepath):
     status = zed.open(init)
     if status != sl.ERROR_CODE.SUCCESS:
         print(repr(status))
-        exit()
+        exit(1)
 
     runtime_parameters = sl.RuntimeParameters()
 
