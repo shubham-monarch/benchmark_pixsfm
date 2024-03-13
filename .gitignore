@@ -1,6 +1,10 @@
 *.pyc
 *.pdf
 
+pixsfm_dataset/
+svo_output/
+pixsfm_output/
+
 __pycache__/
 
 build/
