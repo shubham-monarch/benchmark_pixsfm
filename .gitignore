@@ -1,9 +1,11 @@
 *.pyc
 *.pdf
 
+*.png
+
 pixsfm_dataset/
 svo_output/
-pixsfm_output/
+pixsfm_outputs/
 
 __pycache__/
 
