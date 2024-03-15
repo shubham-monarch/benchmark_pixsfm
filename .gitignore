@@ -7,6 +7,7 @@ pixsfm_dataset/
 svo_output/
 pixsfm_outputs/
 
+ply/
 __pycache__/
 
 build/
