@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
 
-import sys 
 import pyzed.sl as sl
 import os
 import shutil
 import json
+import sys
+import argparse
 
 def parse_camera_parameters(zed):
     calibration_params = zed.get_camera_information().calibration_parameters
@@ -46,6 +48,7 @@ def get_pose(zed,zed_pose, zed_sensors):
 
     # Display the translation and timestamp
     py_translation = sl.Translation()
+    
     tx = round(zed_pose.get_translation(py_translation).get()[0], 3)
     ty = round(zed_pose.get_translation(py_translation).get()[1], 3)
     tz = round(zed_pose.get_translation(py_translation).get()[2], 3)
@@ -65,9 +68,7 @@ def get_pose(zed,zed_pose, zed_sensors):
     return pose_dict
 
 
-def main(filepath, nb_frames):
-
-    print(f"Desired number of frames: {nb_frames}")
+def main(filepath, num_frames):
 
     #filepath = "/media/bboda/bhanu/data/testing_data/svo/front_2023-09-28-15-20-38.svo"
     print("Reading SVO file: {0}".format(filepath))
@@ -75,11 +76,14 @@ def main(filepath, nb_frames):
     input_type = sl.InputType()
     input_type.set_from_svo_file(filepath)
     init = sl.InitParameters(input_t=input_type, svo_real_time_mode=False)
+    init.coordinate_units = sl.UNIT.METER 
+    #init.coordinate_system = sl.COORDINATE_SYSTEM.RIGHT_HANDED_Y_DOWN
+
     zed = sl.Camera()
     status = zed.open(init)
     if status != sl.ERROR_CODE.SUCCESS:
         print(repr(status))
-        exit(1)
+        exit()
 
     runtime_parameters = sl.RuntimeParameters()
 
@@ -104,20 +108,16 @@ def main(filepath, nb_frames):
 
     # set up output directory and delete old output
     print("clear old output")
-    dir_path = "svo_output"
+    dir_path = "../svo_output"
     try:
         shutil.rmtree(dir_path)
     except OSError as e:
         print("Error: %s : %s" % (dir_path, e.strerror))
 
     # number of frames in the recording
-    print(f"num_frames in svo: {zed.get_svo_number_of_frames()}")
-    ##nb_frames = zed.get_svo_number_of_frames()
-    #print(f"nb_frames: {nb_frames}")
-    #return
+    mx_frames = zed.get_svo_number_of_frames()
     #nb_frames = 5
-    #nb_frames = 10
-    
+
     # main loop
     while True: # change to True
         print("Doing {}".format(i))
@@ -140,12 +140,8 @@ def main(filepath, nb_frames):
             print("Writing images")
             zed.retrieve_image(image, sl.VIEW.LEFT)
             zed.retrieve_image(image_r, sl.VIEW.RIGHT)
-            #image.write( os.path.join(output_dir, 'left_image.png') )
-            #image_r.write( os.path.join(output_dir, 'right_image.png') )
-
             image.write( os.path.join(output_dir, 'left_image.jpg') )
             image_r.write( os.path.join(output_dir, 'right_image.jpg') )
-
 
             # retrive and write point cloud
             print("Writing point cloud of resolution")
@@ -163,8 +159,10 @@ def main(filepath, nb_frames):
             with open(settings_filepath, 'w') as outfile:
                 json.dump(settings_dict, outfile)
             
+
+
             # Check if we have reached the end of the video
-            if svo_position >= (nb_frames - 1):  # End of SVO
+            if svo_position >= (min(mx_frames - 1, num_frames -1)):  # End of SVO
                 sys.stdout.write("\nSVO end has been reached. Exiting now.\n")
                 break
 
@@ -174,5 +172,12 @@ def main(filepath, nb_frames):
     zed.close()
 
 if __name__ == "__main__":
-    file_path=""
-    main(file_path)
+    
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--input_path', type=str, required = True, help='svo file path')
+    parser.add_argument('--num_frames', type=int,  default = 40, help='The number of frames')
+    
+    args = parser.parse_args()
+
+    main(args.input_path, args.num_frames)
+
