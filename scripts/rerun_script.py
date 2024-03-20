@@ -7,7 +7,7 @@ from plyfile import PlyData
 rr.init("rerun_example_my_data", spawn=True)
 
 # Read the PLY file
-plydata_sfm = PlyData.read('/home/skumar/benchmark_pixSFM/ply/sfm_in_camera_frame_orange.ply')
+plydata_sfm = PlyData.read('/home/skumar/slam-helpers/p360_dataset/ply/sfm_in_camera_frame_orange.ply')
 plydata_svo = PlyData.read('/home/skumar/benchmark_pixSFM/ply/svo_yellow.ply')
 #plydata_sfm_in_camera_frame = PlyData.read('/home/skumar/benchmark_pixSsFM/ply/sfm_yellow_old.ply')
 #plydata_svo = PlyData.read('/home/skumar/benchmark_pixSFM/svo_output/frame_20/pointcloud/pointcloud.ply')
